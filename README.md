@@ -25,13 +25,7 @@ Reads the CSV and performs a basic audit. The dataset has 5,000 rows and 14 colu
 
 ### Section 2 — Exploratory Data Analysis
 
-The EDA produces 18 plots, all saved to the `plots/` folder. The key findings are as follows.
-
-The classification target is mildly imbalanced — 61.3% of shipments experienced a disruption and 38.7% did not. The regression target, `Lead_Time_Days`, is heavily right-skewed with a median of about 8 days and a maximum of 236 days. Shipments that experienced a disruption tend to have noticeably longer lead times than those that did not.
-
-Among the numeric features, `Carrier_Reliability_Score` shows the clearest separation between disrupted and non-disrupted shipments — lower reliability scores are strongly associated with disruption. `Geopolitical_Risk_Score` also trends upward with disruption. The remaining numeric features (`Distance_km`, `Weight_MT`, `Fuel_Price_Index`) show less obvious separation between the two classes.
-
-Among the categorical features, `Weather_Condition` is the most informative — Hurricane and Storm conditions have the highest disruption rates. There is no severe multicollinearity among numeric features, with all pairwise correlations below 0.15 in absolute value.
+The EDA produces 18 plots, all saved to the `plots/` folder. T
 
 ### Section 3 — Preprocessing
 
@@ -43,7 +37,7 @@ First, `Shipment_ID` and `Date` are dropped since they carry no predictive signa
 
 **Train/test split.** The data is split 80% train and 20% test. For the classification task, the split is stratified on `Disruption_Occurred` to ensure both sets have the same class balance (61.3% disruption in both). The same random seed (42) is used throughout for reproducibility.
 
-**Scaling.** A `StandardScaler` is applied to the 5 numeric columns for the Logistic Regression and Linear Regression versions of the data — these models are sensitive to feature magnitude. Critically, the scaler is fitted on the training set only and then applied to the test set, which prevents data leakage. CART inputs are left unscaled since trees are scale-invariant.
+**Scaling.** A `StandardScaler` is applied to the 5 numeric columns for the Logistic Regression and Linear Regression versions of the data; these models are sensitive to feature magnitude. Critically, the scaler is fitted on the training set only and then applied to the test set, which prevents data leakage. CART inputs are left unscaled since trees are scale-invariant.
 
 Everything is then saved into `preprocessed_data.pkl`.
 
@@ -78,11 +72,3 @@ Use `data['X_reg_train_le']` and `data['X_reg_test_le']` as features, with `data
 ### Recovering Category Labels
 
 The label encoders for each categorical column are stored in `data['le_dict']`. These are useful when interpreting CART splits — for example, to find out which integer code maps to which port or transport mode. The reference categories dropped during one-hot encoding are Antwerp (ports), Air (transport mode), Automotive (product category), and Clear (weather condition).
-
----
-
-## Suggested Evaluation Metrics
-
-For classification (Logistic Regression and CART), the primary metric is ROC-AUC, supplemented by precision, recall, F1-score, and the confusion matrix. Because this project has a cost-sensitive framing — missed disruptions are more costly than unnecessary interventions — pay attention to how different classification thresholds shift the trade-off between false positives and false negatives.
-
-For regression (Linear Regression and CART), use RMSE as the primary metric alongside MAE and R². Given that `Lead_Time_Days` is right-skewed with some large outliers, MAE may be a more robust complement to RMSE.
